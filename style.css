@@ -1,0 +1,452 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.box-navbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* NAVBAR NIMPA HERO */
+.navbar-nimpa {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 70%;
+    height: 100px;
+    margin-top: 30px;
+    position: absolute;
+    top: 0;
+    z-index: 1000;
+    background: #FFF1DC;
+    border: 2px solid orange;
+    border-radius: 55px;
+    overflow: hidden;
+}
+
+/*BAGIAN NAVBAR (LOGO)*/
+.logo {
+    position: relative;
+    z-index: 1;
+}
+.logo-jb {
+    width: 170px;
+    height: auto;
+    margin-left: 25px;
+    display: block;
+}
+
+/*BAGIAN NAVBAR (MENU)*/
+.box-stok-akun-testimoni {
+    display: flex;
+    list-style-type: none;
+    gap: 10px;
+    margin-right: 25px;
+    position: relative;
+    z-index: 1;
+}
+.menu-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    color: black;
+    text-decoration: none;
+    padding: 8px 15px;
+}
+.ikon-menu {
+    width: 28px;
+    height: 28px;
+    transform-origin: center;
+}
+
+/* ===== FOLDER (Stok Akun) ===== */
+.folder-belakang { fill: #B98B5B; }
+.folder-depan    { fill: #E3C298; }
+.menu-link:hover .folder {
+    animation: folder-lompat 0.7s ease-in-out;
+}
+@keyframes folder-lompat {
+    0%   { transform: translateY(0)    rotate(0deg); }
+    40%  { transform: translateY(-8px) rotate(180deg); }
+    70%  { transform: translateY(-3px) rotate(300deg); }
+    100% { transform: translateY(0)    rotate(360deg); }
+}
+
+/* ===== CENTANG (Testimoni) ===== */
+.centang { transition: transform 0.25s ease; }
+.lingkaran {
+    fill: #22A34A;
+    stroke: #22A34A;
+    stroke-width: 2;
+    transition: fill 0.25s, stroke 0.25s;
+}
+.tanda {
+    fill: none;
+    stroke: white;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.25s;
+}
+.menu-link:hover .centang  { transform: scale(1.25); }
+.menu-link:hover .lingkaran { fill: white; }
+.menu-link:hover .tanda    { stroke: #22A34A; }
+
+.wrap-rumah { position: relative; display: flex; }
+.atap        { fill: #E65100; stroke: #E65100; stroke-width: 2; stroke-linejoin: round; }
+.dinding     { fill: #FFC46B; }
+.ruang-pintu { fill: #3B2412; }
+.pintu {
+    fill: #A0602B;
+    transform-box: fill-box;
+    transform-origin: left center;
+    transition: transform 0.35s ease;
+}
+.panah {
+    position: absolute;
+    left: calc(100% + 3px);
+    top: 62%;
+    width: 16px;
+    height: 10px;
+    fill: none;
+    stroke: #E65100;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    translate: 8px 0;
+    transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.menu-link:hover .pintu,
+.menu-link:focus-visible .pintu { transform: scaleX(0.2); }
+.menu-link:hover .panah,
+.menu-link:focus-visible .panah {
+    opacity: 1;
+    translate: 0 0;
+    animation: panah-tunjuk 0.7s ease-in-out 0.25s infinite;
+}
+@keyframes panah-tunjuk {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(-4px); }
+}
+
+/*BAGIAN NAVBAR (IKON SHURIKEN)*/
+.ikon {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: multiply;
+    animation:
+        lempar 12s linear var(--d) infinite both,
+        apung  var(--f) ease-in-out infinite;
+}
+.ikon1 { width: 55px; top: 8%;  left: 30%; --r: 18deg;  --d: 0.3s; --f: 3.2s; }
+.ikon2 { width: 60px; top: 55%; left: 38%; --r: -28deg; --d: 0.8s; --f: 4s;   }
+.ikon3 { width: 40px; top: 12%; left: 47%; --r: 42deg;  --d: 1.3s; --f: 3.6s; }
+.ikon4 { width: 45px; top: 60%; left: 55%; --r: -12deg; --d: 1.8s; --f: 4.4s; }
+.ikon5 { width: 50px; top: 5%;  left: 62%; --r: 65deg;  --d: 2.3s; --f: 3.8s; }
+
+@keyframes lempar {
+    0% {
+        translate: -60px -180px;
+        rotate: calc(var(--r) - 720deg);
+        opacity: 0;
+        animation-timing-function: cubic-bezier(.2, .8, .3, 1.1);
+    }
+    12% { translate: 0 0; rotate: var(--r); opacity: 0.3; }
+    70% {
+        translate: 0 0;
+        rotate: var(--r);
+        opacity: 0.3;
+        animation-timing-function: ease-in;
+    }
+    82%, 100% {
+        translate: 140px 260px;
+        rotate: calc(var(--r) + 540deg);
+        opacity: 0;
+    }
+}
+@keyframes apung {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ikon { animation: none; opacity: 0.3; rotate: var(--r); }
+}
+
+.hero-bola {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 205px 0 40px;     
+    overflow: hidden;
+    background-color: #1F2230;
+    font-family: "Nunito", sans-serif;
+}
+
+/* grid kotak yang bergeser pelan ke samping */
+.hero-bola::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -48px;          
+    right: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: geser-grid 8s linear infinite;
+    z-index: 0;
+}
+@keyframes geser-grid {
+    from { translate: 0 0; }
+    to   { translate: 48px 0; }
+}
+
+.panggung {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1100px;
+    height: 640px;
+}
+
+.item {
+    position: absolute;
+    left: calc(50% + var(--x));
+    top:  calc(50% + var(--y));
+    width: 0;
+    height: 0;
+    z-index: 2;
+    animation:
+        masuk  1s   cubic-bezier(.2, .9, .3, 1.15) var(--d) both,
+        gabung .8s  ease-in 9.2s forwards,
+        sebar  1s   cubic-bezier(.2, .9, .3, 1.2) 10.1s forwards;
+}
+@keyframes masuk {
+    from { translate: var(--sx) 0; rotate: -540deg; opacity: 0; }
+    to   { translate: 0 0;         rotate: 0deg;    opacity: 1; }
+}
+
+@keyframes gabung {
+    from { translate: 0 0; scale: 1; }
+    to   { translate: calc(var(--x) * -1) calc(var(--y) * -1); scale: .45; }
+}
+
+@keyframes sebar {
+    from { translate: calc(var(--x) * -1) calc(var(--y) * -1); scale: .45; }
+    to   { translate: calc(var(--ex) - var(--x)) calc(var(--ey) - var(--y)); scale: .8; }
+}
+
+
+.bola {
+    position: absolute;
+    left: calc(var(--b) / -2);
+    top:  calc(var(--b) / -2);
+    width:  var(--b);
+    height: var(--b);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 30% 28%, #FFC266, #FF8200 55%, #E65100);
+    box-shadow: 0 8px 24px rgba(255,106,0,.45), inset 0 -6px 12px rgba(0,0,0,.15);
+    animation:
+        putar      1s ease-in-out var(--s) both,
+        apung-bola var(--f) ease-in-out 11.2s infinite;   /* ngambang setelah berpencar */
+}
+.bola svg { width: 62%; height: 62%; overflow: visible; }
+@keyframes putar {
+    from { transform: perspective(600px) rotateY(0deg); }
+    to   { transform: perspective(600px) rotateY(720deg); }
+}
+@keyframes apung-bola {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -12px; }
+}
+
+/* ----- teks di samping bola (.r = kanan, .l = kiri) ----- */
+.teks {
+    position: absolute;
+    top: 0;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 32px;
+    font-weight: 900;
+    white-space: nowrap;
+    animation:
+        muncul .6s ease-out calc(var(--s) + .5s) both,
+        hilang .4s ease-in 8.9s forwards;
+}
+.r .teks { left:  calc(var(--b) / 2 + 18px); --tx: -24px; }
+.l .teks { right: calc(var(--b) / 2 + 18px); --tx:  24px; }
+@keyframes muncul {
+    from { opacity: 0; translate: var(--tx) 0; }
+    to   { opacity: 1; translate: 0 0; }
+}
+@keyframes hilang { to { opacity: 0; } }
+
+/* ===== ANIMASI IKON DI DALAM BOLA ===== */
+.uang-kasih { transform-origin: 10px 46px; animation: kasih 1.4s ease-in-out infinite; }
+@keyframes kasih {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25%      { transform: translateX(6px) rotate(9deg); }
+    50%      { transform: translateX(-2px) rotate(-6deg); }
+    75%      { transform: translateX(5px) rotate(6deg); }
+}
+
+.sayap { transform-origin: 18px 38px; animation: kepak .5s ease-in-out infinite alternate; }
+@keyframes kepak {
+    from { transform: rotate(8deg); }
+    to   { transform: rotate(-32deg); }
+}
+
+.cl { fill: #22A34A; stroke: #22A34A; stroke-width: 2; animation: tukar-isi 2s ease-in-out infinite; }
+.ct { fill: none; stroke: white; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; animation: tukar-garis 2s ease-in-out infinite; }
+.denyut { transform-box: fill-box; transform-origin: center; animation: denyut 2s ease-in-out infinite; }
+@keyframes tukar-isi {
+    0%, 20%, 100% { fill: #22A34A; }
+    45%, 75%      { fill: white; }
+}
+@keyframes tukar-garis {
+    0%, 20%, 100% { stroke: white; }
+    45%, 75%      { stroke: #22A34A; }
+}
+@keyframes denyut {
+    0%, 20%, 100% { transform: scale(1); }
+    45%, 75%      { transform: scale(1.2); }
+}
+
+.pengait { animation: kunci 2.4s ease-in-out infinite; }
+@keyframes kunci {
+    0%, 30%   { transform: translateY(-7px); }
+    50%, 80%  { transform: translateY(0); }
+    100%      { transform: translateY(-7px); }
+}
+
+.inti {
+    --D: min(480px, 84vw);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 0;
+    height: 0;
+    z-index: 1;
+    border-radius: 50%;
+    overflow: hidden;            
+    background: #FFF1DC;
+    border: 4px solid #FF8200;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    animation: inti 1.3s cubic-bezier(.2, .9, .3, 1.1) 10.1s forwards;
+}
+@keyframes inti {
+    0%   { width: 20px;      height: 20px;      opacity: 0; }
+    20%  { width: 60px;      height: 60px;      opacity: 1; }
+    100% { width: var(--D);  height: var(--D);  opacity: 1; }
+}
+.inti-isi {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.jelas {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;          
+    color: #2B2B2B;
+    opacity: 0;
+    animation: naik .6s ease-out 11.3s forwards;
+}
+@keyframes naik {
+    from { opacity: 0; translate: 0 16px; }
+    to   { opacity: 1; translate: 0 0; }
+}
+.logo-jatuh {
+    width: min(390px, 72vw);
+    height: auto;
+    display: block;
+    opacity: 0;
+    animation: jatuh 1.1s ease-in 11.9s forwards;
+}
+@keyframes jatuh {
+    0%   { opacity: 1; transform: translateY(-420px); }
+    55%  { opacity: 1; transform: translateY(0) scale(1, 1); }
+    70%  { opacity: 1; transform: translateY(6px) scale(1.25, .8); }
+    85%  { opacity: 1; transform: translateY(0) scale(.95, 1.06); }
+    100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+
+/* =========================================================
+   RESPONSIF (HP & tablet)
+   ========================================================= */
+
+/* ----- Navbar di HP: lebar 70% kesempitan, jadi dilebarin & dikecilin ----- */
+@media (max-width: 600px) {
+    nav { width: 94%; height: 80px; margin-top: 16px; }
+    .logo-jb { width: 120px; margin-left: 16px; }
+    .box-stok-akun-testimoni { margin-right: 8px; gap: 0; }
+    .menu-link { font-size: 14px; padding: 6px 8px; }
+    .ikon-menu { width: 24px; height: 24px; }
+    .ikon { width: 36px; }              /* shuriken hiasan ikut dikecilin */
+}
+@media (max-width: 380px) {
+    .logo-jb { width: 100px; margin-left: 12px; }
+    .menu-link { font-size: 13px; padding: 6px 6px; }
+}
+
+/* ----- Hero beranda di HP & tablet (<= 1150px) -----
+   Di desktop posisi bola pakai piksel besar (sampai +-540px dari tengah), jadi di layar
+   sempit kepotong. Di sini layout-nya dibikin ulang lebih kecil dan nyusun ke bawah.
+   --u = 1 "satuan" ukuran. Di HP 360px lebar, 1 satuan = 1px; layar lebih sempit
+   otomatis mengecil, layar lebih lebar mentok di 1.3px biar nggak kegedean.
+   Posisi di inline style index.html (--x, --y, --ex, --ey, --b) ditimpa pakai !important. */
+@media (max-width: 1150px) {
+    .hero-bola { --u: min(1.3px, .27778vw); }
+    .panggung  { height: calc(520 * var(--u)); }
+
+    .panggung > .item { --b: calc(80 * var(--u)) !important; }
+
+    /* posisi awal: zig-zag atas ke bawah. posisi akhir: melingkar di sekitar lingkaran tengah */
+    .panggung > .item:nth-child(1) { --x: calc(-100 * var(--u)) !important; --y: calc(-200 * var(--u)) !important; --ex: 0px                    !important; --ey: calc(-170 * var(--u)) !important; }
+    .panggung > .item:nth-child(2) { --x: calc(-100 * var(--u)) !important; --y: 0px                    !important; --ex: calc( 140 * var(--u)) !important; --ey: calc( -78 * var(--u)) !important; }
+    .panggung > .item:nth-child(3) { --x: calc(-100 * var(--u)) !important; --y: calc( 200 * var(--u)) !important; --ex: calc(  92 * var(--u)) !important; --ey: calc( 140 * var(--u)) !important; }
+    .panggung > .item:nth-child(4) { --x: calc( 100 * var(--u)) !important; --y: calc(-100 * var(--u)) !important; --ex: calc( -92 * var(--u)) !important; --ey: calc( 140 * var(--u)) !important; }
+    .panggung > .item:nth-child(5) { --x: calc( 100 * var(--u)) !important; --y: calc( 100 * var(--u)) !important; --ex: calc(-140 * var(--u)) !important; --ey: calc( -78 * var(--u)) !important; }
+
+    .teks { font-size: calc(20 * var(--u)); }
+    .r .teks { left:  calc(var(--b) / 2 + 12 * var(--u)); }
+    .l .teks { right: calc(var(--b) / 2 + 12 * var(--u)); }
+
+    .inti { --D: calc(250 * var(--u)); border-width: 3px; }
+    .jelas { font-size: calc(38 * var(--u)); margin-bottom: calc(6 * var(--u)); }
+    .logo-jatuh { width: calc(205 * var(--u)); }
+}
+
+/* HP: nav lebih pendek (16 + 80), jadi jarak atas hero dikurangin */
+@media (max-width: 600px) {
+    .hero-bola {
+        padding: 116px 0 32px;
+        min-height: 100svh;
+    }
+}

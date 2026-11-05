@@ -1,0 +1,219 @@
+/* =========================================================
+   stok_akun.css
+   Dimuat SETELAH style.css dan halaman.css.
+   Isinya cuma yang khusus halaman Stok Akun: filter, grid, kartu, lightbox.
+   ========================================================= */
+
+/* ----- Filter status ----- */
+.filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 20px;
+}
+.chip {
+    font: inherit;
+    font-weight: 800;
+    padding: 7px 16px;
+    border: 2px solid var(--oren);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--oren-tua);
+    cursor: pointer;
+}
+.chip[aria-pressed="true"] {
+    background: var(--oren);
+    color: #fff;
+}
+.chip:focus-visible,
+.foto:focus-visible,
+.wa:focus-visible {
+    outline: 3px solid var(--hitam);
+    outline-offset: 2px;
+}
+
+/* ----- Grid: 2 kolom HP, 3 tablet, 4 desktop ----- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+@media (min-width: 720px)  { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* ----- Kartu ----- */
+.kartu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: var(--krem);
+    border: 2px solid var(--oren);
+    border-radius: 22px;
+}
+.kartu[hidden] { display: none; }
+
+/* ----- Animasi muncul: kartu fade in satu-satu, kiri ke kanan lalu ke bawah -----
+   --i (urutan kartu) diisi otomatis oleh JavaScript, jadi nambah kartu nggak perlu atur apa-apa.
+   Sengaja nggak ada keyframe "to", biar kartu SOLD berhenti di opacity .65 miliknya sendiri. */
+.kartu.masuk {
+    animation: muncul .55s ease-out backwards;
+    animation-delay: calc(var(--i, 0) * 90ms);
+}
+@keyframes muncul {
+    from { opacity: 0; transform: translateY(16px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kartu.masuk { animation: none; }
+}
+
+/* foto: rasio 7:10 = rasio screenshot lu (1414x2000), jadi nggak kepotong banyak */
+.foto {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 7 / 10;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #FFD9A0;
+    cursor: zoom-in;
+}
+.foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+/* badge status */
+.status {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: clamp(.68rem, 2.4vw, .8rem);
+    font-weight: 900;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+.status.ready   { background: var(--hijau); }
+.status.booking { background: var(--oren); }
+.status.sold    { background: var(--merah); }
+
+.nama {
+    text-align: center;
+    font-size: clamp(1rem, 3.6vw, 1.3rem);
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.detail {
+    list-style: none;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .6);
+    font-size: clamp(.74rem, 2.6vw, .9rem);
+}
+.detail li {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 2px 0;
+}
+.detail b { font-weight: 800; text-align: right; }
+
+.harga {
+    padding: 8px 6px;
+    text-align: center;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #FF9A1F, #F37A00);
+    color: #fff;
+    font-size: clamp(1.05rem, 4.2vw, 1.5rem);
+    font-weight: 900;
+}
+
+.wa {
+    margin-top: auto;               /* tombol selalu nempel di bawah kartu */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 10px;
+    border: 2px solid var(--oren);
+    border-radius: 999px;
+    background: var(--hitam);
+    color: #fff;
+    font-size: clamp(.78rem, 2.8vw, .95rem);
+    font-weight: 800;
+    text-decoration: none;
+}
+.wa svg { width: 22px; height: 22px; flex: none; }
+.wa:hover { background: #000; }
+
+/* ----- Kartu SOLD: abu-abu pudar, tombol tetap bisa diklik ----- */
+.kartu.terjual {
+    filter: grayscale(1);
+    opacity: .65;
+    transition: opacity .2s;
+}
+.kartu.terjual:hover,
+.kartu.terjual:focus-within { opacity: 1; }
+
+/* ----- Lightbox (foto lengkap) ----- */
+dialog#lightbox {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: min(92vw, 520px);
+    max-height: 92vh;
+    overflow: visible;
+}
+dialog#lightbox::backdrop { background: rgba(31, 34, 48, .82); }
+dialog#lightbox img {
+    display: block;
+    max-width: 100%;
+    max-height: 88vh;
+    margin: 0 auto;
+    border-radius: 16px;
+}
+.tutup {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--oren);
+    border-radius: 50%;
+    background: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* ----- Layar HP (<= 460px): 2 kolom kartu, jadi filter, kartu & tombol dirapetin
+         biar teks nggak patah/kepotong ----- */
+@media (max-width: 460px) {
+    .filter { gap: 6px; }
+    .chip   { padding: 6px 12px; font-size: .88rem; }
+    .kartu  { padding: 8px; gap: 7px; border-radius: 18px; }
+    .detail { padding: 8px; font-size: .72rem; }
+    .detail span,
+    .detail b { white-space: nowrap; }
+    .wa     { gap: 4px; padding: 9px 4px; font-size: .68rem; white-space: nowrap; }
+    .wa svg { width: 16px; height: 16px; }
+}
+
+/* ----- HP paling sempit (<= 340px): kartu jadi 1 kolom, ukuran balik normal ----- */
+@media (max-width: 340px) {
+    .grid   { grid-template-columns: 1fr; }
+    .chip   { padding: 6px 11px; font-size: .84rem; }
+    .kartu  { padding: 10px; gap: 8px; border-radius: 22px; }
+    .detail { padding: 8px 10px; font-size: .88rem; }
+    .wa     { gap: 8px; padding: 9px 10px; font-size: .88rem; }
+    .wa svg { width: 22px; height: 22px; }
+}

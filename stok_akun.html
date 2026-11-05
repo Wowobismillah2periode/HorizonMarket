@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- urutan: style.css (navbar) -> halaman.css (dasar halaman dalam) -> stok_akun.css (khusus halaman ini) -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="halaman.css">
+    <link rel="stylesheet" href="stok_akun.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <title>Stok Akun - Horizon Market</title>
+</head>
+<body>
+
+    <!-- ikon WhatsApp, dipakai ulang di tiap tombol -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="i-wa" viewBox="0 0 32 32">
+            <circle cx="16" cy="16" r="16" fill="#25D366"/>
+            <path d="M16 7a9 9 0 0 0-7.8 13.5L7 25l4.7-1.2A9 9 0 1 0 16 7z" fill="#fff"/>
+            <path d="M12.5 12.5c.3 3 2.8 5.700 6 6.700l1.500-1.700-2-1-1 .8c-1-.4-2-1.400-2.400-2.400l.8-1-1-2z" fill="#25D366"/>
+        </symbol>
+    </svg>
+
+    <!-- NAVBAR (sama persis dengan yang kemarin) -->
+    <div class="box-navbar">
+        <nav>
+            <img class="ikon ikon1" src="guest_png.png" alt="">
+            <img class="ikon ikon2" src="gembok_png.png" alt="">
+            <img class="ikon ikon3" src="roblox_png.png" alt="">
+            <img class="ikon ikon4" src="guest_png.png" alt="">
+            <img class="ikon ikon5" src="gembok_png.png" alt="">
+
+            <div class="logo">
+                <a href="index.html">
+                    <img class="logo-jb" src="Logo_JB.png" alt="Horizon Market">
+                </a>
+            </div>
+
+            <ul class="box-stok-akun-testimoni">
+                <li>
+                    <a class="menu-link" href="index.html">
+                        <span class="wrap-rumah">
+                            <svg class="ikon-menu rumah" viewBox="0 0 32 32" aria-hidden="true">
+                                <path class="atap" d="M3 15.5L16 4l13 11.5z"/>
+                                <path class="dinding" d="M7 14h18v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/>
+                                <rect class="ruang-pintu" x="13" y="18" width="6" height="10"/>
+                                <rect class="pintu" x="13" y="18" width="6" height="10"/>
+                            </svg>
+                            <svg class="panah" viewBox="0 0 20 12" aria-hidden="true">
+                                <path d="M19 6H3M7.5 1.5L3 6l4.5 4.5"/>
+                            </svg>
+                        </span>
+                        Beranda
+                    </a>
+                </li>
+                <li>
+                    <a class="menu-link" href="testimoni.html">
+                        <svg class="ikon-menu centang" viewBox="0 0 32 32" aria-hidden="true">
+                            <circle class="lingkaran" cx="16" cy="16" r="14"/>
+                            <path class="tanda" d="M9 16.5l4.5 4.5L23 11.5"/>
+                        </svg>
+                        Testimoni
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- ISI HALAMAN -->
+    <main class="halaman">
+        <h1>Stok Akun</h1>
+        <p class="sub">Klik foto buat lihat screenshot lengkap. Akun SOLD bisa ditanyain restok.</p>
+
+        <div class="filter" role="group" aria-label="Filter status">
+            <button class="chip" data-f="semua" aria-pressed="true">Semua</button>
+            <button class="chip" data-f="ready" aria-pressed="false">Ready</button>
+            <button class="chip" data-f="booking" aria-pressed="false">Booking</button>
+            <button class="chip" data-f="sold" aria-pressed="false">Sold</button>
+        </div>
+
+        <div class="grid">
+
+            <!-- ===== KARTU 1 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_1.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 01]">
+                    <img src="foto_akun_1_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 01]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 01]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 10.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2001%5D%20(Rp10.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 2 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_2.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 02]">
+                    <img src="foto_akun_2_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 02]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 02]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 10.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2002%5D%20(Rp10.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 3 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_3.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 03]">
+                    <img src="foto_akun_3_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 03]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 03]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 10.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2003%5D%20(Rp10.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 4 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_4.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 04]">
+                    <img src="foto_akun_4_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 04]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 04]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 35.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2004%5D%20(Rp35.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 5 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_5.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 05]">
+                    <img src="foto_akun_5_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 05]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 05]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 30.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2005%5D%20(Rp30.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 6 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_6.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 06]">
+                    <img src="foto_akun_6_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 06]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 06]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 25.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2006%5D%20(Rp25.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 7 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_7.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 07]">
+                    <img src="foto_akun_7_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 07]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 07]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 35.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2007%5D%20(Rp35.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 8 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_8.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 08]">
+                    <img src="foto_akun_8_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 08]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 08]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 35.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2008%5D%20(Rp35.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+
+            <!-- ===== KARTU 9 (READY) =====-->
+            <article class="kartu" data-status="ready">
+                <button class="foto" data-full="foto_akun_9.webp" aria-label="Lihat foto lengkap Bacon BSAE [BSAE 09]">
+                    <img src="foto_akun_9_kecil.webp" alt="Screenshot akun Bacon BSAE [BSAE 09]" loading="lazy">
+                    <span class="status ready">✓ READY</span>
+                </button>
+                <h2 class="nama">Bacon BSAE</h2>
+                <ul class="detail">
+                    <li><span>Kode Akun</span><b>[BSAE 09]</b></li>
+                    <li><span>Robux</span><b>0</b></li>
+                    <li><span>Gamepass</span><b>Tidak Ada</b></li>
+                    <li><span>Data</span><b>Datpol</b></li>
+                </ul>
+                <p class="harga">Rp 40.000</p>
+                <a class="wa" href="https://wa.me/6285863549795?text=Bang%2C%20beli%20akun%20kode%20%3A%20%5BBSAE%2009%5D%20(Rp40.000)" target="_blank" rel="noopener">
+                    <svg aria-hidden="true"><use href="#i-wa"/></svg>Chat via WhatsApp
+                </a>
+            </article>
+        </div>
+
+        <!-- Muncul kalau filter Ready/Booking/Sold nggak ada isinya -->
+        <div class="kosong" id="kosong" role="status" hidden>
+            <img src="kosong_kategori.png" alt="" width="324" height="314">
+            <h2>Maaf, kategori akun yang kamu cari belum ada</h2>
+        </div>
+    </main>
+
+    <!-- LIGHTBOX: foto lengkap pas diklik -->
+    <dialog id="lightbox">
+        <form method="dialog"><button class="tutup" aria-label="Tutup">✕</button></form>
+        <img src="" alt="Screenshot akun lengkap">
+    </dialog>
+
+    <script>
+        // buka foto lengkap
+        const dlg = document.getElementById('lightbox');
+        const imgBesar = dlg.querySelector('img');
+        document.querySelectorAll('.foto').forEach(b => {
+            b.addEventListener('click', () => {
+                imgBesar.src = b.dataset.full;
+                dlg.showModal();
+            });
+        });
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+        // animasi fade in berurutan (kartu yang kelihatan aja, urut dari kiri ke kanan lalu ke bawah)
+        function animasiKartu() {
+            let urutan = 0;
+            document.querySelectorAll('.kartu').forEach(k => {
+                if (k.hidden) return;
+                k.style.setProperty('--i', urutan++);
+                k.classList.remove('masuk');
+                void k.offsetWidth;          // reset biar animasi bisa diulang
+                k.classList.add('masuk');
+            });
+        }
+
+        // filter status
+        const chips = document.querySelectorAll('.chip');
+        chips.forEach(c => c.addEventListener('click', () => {
+            chips.forEach(x => x.setAttribute('aria-pressed', x === c));
+            document.querySelectorAll('.kartu').forEach(k => {
+                k.hidden = c.dataset.f !== 'semua' && k.dataset.status !== c.dataset.f;
+            });
+            // kalau nggak ada kartu yang kelihatan, tampilkan gambar "kategori belum ada"
+            const adaKartu = [...document.querySelectorAll('.kartu')].some(k => !k.hidden);
+            document.getElementById('kosong').hidden = adaKartu;
+            animasiKartu();                  // kartu hasil filter muncul lagi satu-satu
+        }));
+
+        animasiKartu();                      // pertama kali halaman dibuka
+    </script>
+</body>
+</html>

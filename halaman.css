@@ -1,0 +1,119 @@
+/* =========================================================
+   halaman.css
+   Dipakai halaman dalam (stok_akun.html & testimoni.html).
+   Dimuat SETELAH style.css. Isinya: warna dasar, navbar yang
+   nempel di atas layar, pembungkus halaman, dan tampilan "kosong".
+   ========================================================= */
+
+:root {
+    --oren: #FF8A00;
+    --oren-tua: #E06F00;
+    --krem: #FFF1DC;
+    --krem-muda: #FFF8EC;
+    --hitam: #1F2230;
+    --hijau: #22A34A;
+    --merah: #D92D20;
+}
+
+body {
+    background: var(--krem-muda);
+    font-family: "Nunito", sans-serif;
+    color: var(--hitam);
+}
+
+/* ----- Navbar nempel di atas layar pas di-scroll -----
+   "body .box-navbar" sengaja lebih spesifik biar ngalahin aturan di style.css */
+body .box-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    pointer-events: none;      /* area kosong kiri-kanan navbar nggak nahan klik */
+}
+body .box-navbar nav {
+    pointer-events: auto;
+    box-shadow: 0 6px 18px rgba(224, 111, 0, .18);
+}
+
+/* ----- Pembungkus halaman ----- */
+.halaman {
+    max-width: 1100px;
+    margin: 0 auto;
+    /* atas = tinggi navbar (30 + 100) + jarak napas, karena navbar fixed */
+    padding: 170px 14px 60px;
+}
+@media (max-width: 600px) {
+    .halaman { padding-top: 124px; }   /* navbar HP lebih pendek (16 + 80) */
+}
+.halaman h1 {
+    font-size: clamp(1.7rem, 5vw, 2.4rem);
+    font-weight: 900;
+}
+.sub {
+    margin-top: 4px;
+    font-weight: 600;
+    opacity: .75;
+}
+
+/* teks yang cuma kebaca screen reader (buat judul halaman yang nggak ditampilin) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* halaman yang isinya satu blok di tengah layar (contoh: Testimoni) */
+.halaman--tengah {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ----- Tampilan "kosong": ilustrasi + tulisan di tengah ----- */
+.kosong {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 24px 10px 8px;
+    animation: kosong-masuk .5s ease-out both;
+}
+.kosong[hidden] { display: none; }      /* display:flex di atas nggak boleh ngalahin atribut hidden */
+.kosong img {
+    display: block;
+    width: min(280px, 72vw);
+    height: auto;
+    margin-bottom: 12px;
+}
+.kosong h2 {
+    max-width: 26ch;
+    font-size: clamp(1.15rem, 4.6vw, 1.55rem);
+    font-weight: 900;
+    line-height: 1.25;
+}
+.kosong p {
+    max-width: 34ch;
+    font-size: clamp(.92rem, 3.6vw, 1.05rem);
+    font-weight: 600;
+    line-height: 1.4;
+    opacity: .75;
+}
+/* layar lebar: gambar & tulisan dibesarin, judul muat 1 baris */
+@media (min-width: 720px) {
+    .kosong img { width: 300px; }
+    .kosong h2  { max-width: 46ch; font-size: 1.7rem; }
+    .kosong p   { max-width: 52ch; font-size: 1.1rem; }
+}
+@keyframes kosong-masuk {
+    from { opacity: 0; transform: translateY(14px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kosong { animation: none; }
+}
