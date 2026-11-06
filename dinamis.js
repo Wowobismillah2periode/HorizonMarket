@@ -23,9 +23,13 @@
     ul.replaceChildren();
     detail.forEach(d => { const li = el('li'); li.append(el('span', null, d.k), el('b', null, d.v)); ul.append(li); });
   }
-  function linkWA(detail, judul, harga) {
+  // Pesan WA otomatis: "Bang, mau beli akun kode [BSAE 08] (Rp.35.000)". Kode diambil dari baris deskripsi
+  // yang namanya mengandung "kode" (kalau nggak ada, pakai judul). Nomor tujuan = nomor penjual yang diisi saat upload.
+  const WA_DEFAULT = '6285863549795';
+  function linkWA(detail, judul, harga, wa) {
     const kode = (detail.find(d => /kode/i.test(d.k)) || { v: judul }).v;
-    return 'https://wa.me/6285863549795?text=' + encodeURIComponent(`Bang, beli akun kode : ${kode} (${rupiah(harga).replace('Rp ', 'Rp')})`);
+    const pesan = `Bang, mau beli akun kode ${kode} (Rp.${Number(harga).toLocaleString('id-ID')})`;
+    return 'https://wa.me/' + (wa || WA_DEFAULT) + '?text=' + encodeURIComponent(pesan);
   }
 
   // ===== halaman stok akun =====
@@ -43,12 +47,14 @@
         k.querySelector('.foto').setAttribute('aria-label', 'Lihat foto lengkap ' + o.judul);
         k.querySelector('.foto img').alt = 'Screenshot akun ' + o.judul;
       }
+      const rows = [...k.querySelectorAll('.detail li')].map(li => ({ k: li.children[0].textContent, v: li.children[1].textContent }));
+      k.querySelector('.wa').href = linkWA(rows, k.querySelector('.nama').textContent, k.querySelector('.harga').textContent.replace(/\D/g, ''), o && o.wa);
       if (data.status[kode]) pasangStatus(k, data.status[kode]);
     });
     data.akun.forEach(a => {                                    // akun baru dari admin
       const k = el('article', 'kartu');
       const ul = el('ul', 'detail'); isiDetail(ul, a.detail);
-      const wa = el('a', 'wa'); wa.target = '_blank'; wa.rel = 'noopener'; wa.href = linkWA(a.detail, a.judul, a.harga);
+      const wa = el('a', 'wa'); wa.target = '_blank'; wa.rel = 'noopener'; wa.href = linkWA(a.detail, a.judul, a.harga, a.wa);
       wa.innerHTML = '<svg aria-hidden="true"><use href="#i-wa"/></svg>'; wa.append('Chat via WhatsApp');
       k.append(foto(a.foto, a.judul, el('span', 'status')), el('h2', 'nama', a.judul), ul, el('p', 'harga', rupiah(a.harga)), wa);
       grid.append(k); pasangStatus(k, a.status);
@@ -65,7 +71,7 @@
       const baris = Math.floor(i / 2) + 1, pos = i % 2;
       k.style.gridRow = baris; k.style.gridColumn = (baris % 2 ? (pos ? 1 : 2) : (pos ? 2 : 1));
       const ul = el('ul', 'deskripsi');
-      [['📂Barang : ', t.barang], ['💸Harga : ', t.harga], ['👥Sistem : ', t.sistem]].forEach(([a, b]) => ul.append(el('li', null, a + b)));
+      [...(t.toko ? [['🏪Toko : ', t.toko]] : []), ['📂Barang : ', t.barang], ['💸Harga : ', t.harga], ['👥Sistem : ', t.sistem]].forEach(([a, b]) => ul.append(el('li', null, a + b)));
       k.append(foto(t.foto, 'Testimoni ' + (i + 1), el('span', 'status ready', 'Testi ' + (i + 1))), ul);
       tg.append(k);
     });

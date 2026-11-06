@@ -13,11 +13,12 @@
   h1 { font-size: 1.5rem; font-weight: 900; } h2 { font-size: 1.1rem; margin: 18px 0 8px; }
   .kartu { background: #fff; border: 2px solid var(--oren); border-radius: 18px; padding: 16px; margin: 12px 0; }
   label { display: block; font-weight: 700; font-size: .85rem; margin: 10px 0 4px; }
+  small.bantu { display: block; opacity: .65; font-size: .78rem; margin-top: 3px; }
   input, textarea { width: 100%; padding: 10px 12px; border: 2px solid #e5d3b8; border-radius: 12px; font: inherit; }
   input:focus { outline: 0; border-color: var(--oren); }
   button { font: inherit; font-weight: 800; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; background: var(--oren); color: #fff; }
   button.abu { background: #e9e0d2; color: var(--hitam); } button.merah { background: var(--merah); }
-  button:disabled { opacity: .5; cursor: wait; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
   .tabs button { background: #fff; color: var(--oren); border: 2px solid var(--oren); }
   .tabs button.aktif { background: var(--oren); color: #fff; }
@@ -31,6 +32,7 @@
   #panel, .tab { display: none; } .tab.aktif { display: block; }
   .pair { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 6px; }
   #prev { max-width: 140px; border-radius: 12px; margin-top: 8px; display: none; }
+  #banner { display: none; border-color: var(--merah); background: #fff1f0; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -49,6 +51,7 @@
   <!-- ============ PANEL ============ -->
   <div id="panel">
     <div class="baris" style="justify-content:space-between"><h1>Panel Admin</h1><button class="abu" id="keluar">Keluar</button></div>
+    <div id="banner" class="kartu"></div>
     <div class="tabs">
       <button data-t="stok" class="aktif">Stok & Status</button>
       <button data-t="tambahStok">Tambah Stok Akun</button>
@@ -72,65 +75,62 @@
         <label>Judul</label><input id="sJudul" placeholder="Bacon BSAE">
         <label>Deskripsi</label><div id="sDetail"></div>
         <button class="abu" id="sTambah" type="button">+ Tambah deskripsi</button>
+        <small class="bantu">Baris yang namanya mengandung kata "Kode" (misal: Kode Akun = [BSAE 08]) otomatis dipakai di pesan WhatsApp pembeli.</small>
         <label>Harga (angka saja)</label><input id="sHarga" inputmode="numeric" placeholder="10000">
+        <label>Nomor WhatsApp penjual</label><input id="sWA" type="tel" inputmode="tel" placeholder="+62">
+        <small class="bantu">Tombol "Chat via WhatsApp" di kartu ini akan membuka chat ke nomor ini. Boleh ditulis +62 812…, 0812…, atau 812….</small>
         <div style="margin-top:14px"><button id="sKirim">Upload ke website</button></div>
         <p id="sPesan" class="pesan"></p>
       </div>
-    </div>
-
-    <div class="tab" id="t-admin">
-      <div class="kartu"><h2 style="margin-top:0">Kelola Admin</h2>
-        <p class="sub" style="margin-bottom:8px;opacity:.7">Kick = admin itu langsung keluar dan nggak bisa login lagi sampai lu pulihkan.</p>
-        <div id="daftarAdmin">Memuat…</div></div>
     </div>
 
     <div class="tab" id="t-testi">
       <div class="kartu">
         <h2>Tambah Testimoni</h2>
         <label>Foto testimoni (rasio 7:10)</label><input type="file" id="tFoto" accept="image/*">
+        <label>🏪 Nama toko yang upload testi</label><input id="tToko">
         <label>📂 Barang</label><input id="tBarang"><label>💸 Harga</label><input id="tHarga"><label>👥 Sistem</label><input id="tSistem">
         <div style="margin-top:14px"><button id="tKirim">Upload ke website</button></div>
         <p id="tPesan" class="pesan"></p>
       </div>
       <div class="kartu" id="daftarTesti">Memuat…</div>
     </div>
+
+    <div class="tab" id="t-admin">
+      <div class="kartu"><h2 style="margin-top:0">Kelola Admin</h2>
+        <p style="margin-bottom:8px;opacity:.7">Kick = admin itu langsung keluar dan nggak bisa login lagi sampai lu pulihkan.</p>
+        <div id="daftarAdmin">Memuat…</div></div>
+    </div>
+    <p id="versi" style="opacity:.5;font-size:.75rem;margin-top:18px"></p>
   </div>
 </div>
 
 <script>
+const VERSI_PANEL = 'v7';
 const $ = id => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
 const post = async body => {
   const r = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Req': '1' }, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   if (r.status === 401) { tampilLogin(); throw new Error('Sesi habis, login lagi.'); }
-  if (!r.ok) throw new Error(j.error || 'Gagal.');
+  if (!r.ok) throw new Error(j.error || 'Gagal (HTTP ' + r.status + ').');
   return j;
 };
-const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const tampilLogin = () => { $('panel').style.display = 'none'; $('login').style.display = 'block'; };
-const tampilPanel = () => { $('login').style.display = 'none'; $('panel').style.display = 'block'; muat(); cekPemilik(); };
-async function cekPemilik() {                                   // tab Kelola Admin cuma muncul kalau yang login adalah pemilik
-  try { const j = await (await fetch('/api/admin')).json(); $('tabAdmin').style.display = j.pemilik ? '' : 'none'; if (j.pemilik) muatAdmin(); } catch {}
-}
-async function muatAdmin() {
-  const box = $('daftarAdmin');
+const tampilPanel = () => { $('login').style.display = 'none'; $('panel').style.display = 'block'; muat(); cekServer(); };
+
+// cek: yang login siapa, pemilik atau bukan, dan apakah file server (folder api/) sudah versi terbaru
+async function cekServer() {
   try {
-    const j = await (await fetch('/api/admin?admins=1')).json(); box.replaceChildren();
-    j.admins.forEach(a => {
-      const it = el('div', 'item'), info = el('div', 'info');
-      info.append(el('b', null, a.username + (a.pemilik ? ' (pemilik)' : '')), el('br'), el('small', null, a.email + (a.blok ? ' · DI-KICK' : ' · aktif')));
-      it.append(info);
-      if (!a.pemilik) {
-        const b = el('button', a.blok ? '' : 'merah', a.blok ? 'Pulihkan' : 'Kick');
-        b.onclick = async () => {
-          if (!a.blok && !confirm('Kick "' + a.username + '"? Dia langsung keluar dan nggak bisa login lagi.')) return;
-          try { await post({ aksi: a.blok ? 'pulihkan' : 'kick', username: a.username }); muatAdmin(); } catch (e) { alert(e.message); }
-        };
-        it.append(b);
-      }
-      box.append(it);
-    });
-  } catch { box.textContent = 'Gagal memuat.'; }
+    const j = await (await fetch('/api/admin')).json();
+    $('tabAdmin').style.display = j.pemilik ? '' : 'none'; if (j.pemilik) muatAdmin();
+    $('versi').textContent = 'Login sebagai ' + (j.user || '?') + ' · panel ' + VERSI_PANEL + ' · server ' + (j.versi || 'LAMA');
+    if (j.versi !== VERSI_PANEL) {
+      $('banner').style.display = 'block';
+      $('banner').textContent = '⚠ File server (folder api/ di GitHub) belum ter-update ke versi terbaru, jadi sebagian fitur (riwayat, kick, kepemilikan postingan) belum jalan. Upload ulang semua file api/*.js, tunggu deploy Ready, lalu tekan Ctrl+F5.';
+    }
+  } catch {}
 }
 
 // ---- login
@@ -157,91 +157,124 @@ document.querySelectorAll('.tabs [data-t]').forEach(b => b.onclick = () => {
 
 // ---- daftar stok & testimoni
 let semua = [], filter = 'semua';
-const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
 async function muat() {
-  const [data, html] = await Promise.all([fetch('/api/data', { cache: 'no-store' }).then(r => r.json()), fetch('/stok_akun.html').then(r => r.text())]);
-  data.lama = data.lama || {};
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const lama = [...doc.querySelectorAll('.kartu')].map(k => {            // akun yang ditulis manual di HTML
+  let data;
+  try {
+    const [r, html] = await Promise.all([fetch('/api/admin?daftar=1', { cache: 'no-store' }), fetch('/stok_akun.html').then(x => x.text())]);
+    data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.akun) throw new Error(data.error || 'server belum diperbarui (api/admin.js lama)');
+    data.html = html;
+  } catch (e) { $('daftarStok').textContent = 'Gagal memuat daftar: ' + e.message; $('daftarTesti').textContent = ''; return; }
+  const doc = new DOMParser().parseFromString(data.html, 'text/html');
+  const lama = [...doc.querySelectorAll('.kartu')].map(k => {            // akun yang ditulis manual di HTML = milik admin utama
     const rows = [...k.querySelectorAll('.detail li')].map(li => ({ k: li.children[0].textContent.trim(), v: li.children[1].textContent.trim() }));
-    const kode = rows[0] ? rows[0].v : '';                                 // kode ASLI = id akun lama
-    const o = data.lama[kode] || {};
-    return { id: kode, lama: true, hapus: !!o.hapus, judul: o.judul || k.querySelector('.nama').textContent.trim(), detail: o.detail || rows,
-             harga: o.harga || k.querySelector('.harga').textContent.replace(/\D/g, ''), status: data.status[kode] || k.dataset.status,
-             thumb: k.querySelector('img').getAttribute('src') };
+    const kode = rows[0] ? rows[0].v : '', o = data.lama[kode] || {};
+    return { id: kode, hapus: !!o.hapus, judul: o.judul || k.querySelector('.nama').textContent.trim(), detail: o.detail || rows,
+             harga: o.harga || k.querySelector('.harga').textContent.replace(/\D/g, ''), wa: o.wa || data.waDefault,
+             status: data.status[kode] || k.dataset.status, thumb: k.querySelector('img').getAttribute('src'),
+             oleh: data.pemilikNama, bisaHapus: data.bisaHapusLama };
   }).filter(a => !a.hapus);
-  const baru = data.akun.map(a => ({ id: a.id, judul: a.judul, detail: a.detail, harga: a.harga, status: a.status, thumb: '/api/img?id=' + a.foto + '&k=1' }));
+  const baru = data.akun.map(a => ({ id: a.id, judul: a.judul, detail: a.detail, harga: a.harga, wa: a.wa || data.waDefault, status: a.status,
+    thumb: '/api/img?id=' + a.foto + '&k=1', oleh: a.oleh || data.pemilikNama, bisaHapus: a.bisaHapus }));
   semua = [...lama, ...baru]; gambarStok();
   const box = $('daftarTesti'); box.replaceChildren(el('h2', null, 'Daftar Testimoni (' + data.testi.length + ')'));
   data.testi.forEach((t, i) => {
     const it = el('div', 'item'), im = el('img'); im.src = '/api/img?id=' + t.foto + '&k=1';
-    const info = el('div', 'info'); info.append(el('b', null, 'Testi ' + (i + 1)), el('br'), el('small', null, t.barang + ' · ' + t.harga));
-    const hp = el('button', 'merah', 'Hapus'); hp.onclick = () => hapus('testi', t.id);
-    it.append(im, info, hp); box.append(it);
+    const info = el('div', 'info');
+    info.append(el('b', null, 'Testi ' + (i + 1) + (t.toko ? ' · ' + t.toko : '')), el('br'), el('small', null, t.barang + ' · ' + t.harga + ' · oleh ' + (t.oleh || data.pemilikNama)));
+    it.append(im, info, tombolHapus('testi', t.id, 'Testi ' + (i + 1), t.bisaHapus, t.oleh || data.pemilikNama)); box.append(it);
   });
+}
+function tombolHapus(tipe, id, nama, boleh, pemilik) {
+  const b = el('button', 'merah', boleh ? 'Hapus' : 'Hapus 🔒');
+  if (!boleh) { b.disabled = true; b.title = 'Postingan ini milik ' + pemilik + ', hanya dia yang bisa menghapus.'; return b; }
+  b.onclick = () => hapus(tipe, id, nama); return b;
 }
 function gambarStok() {
   const box = $('daftarStok'); box.replaceChildren();
   semua.filter(a => filter === 'semua' || a.status === filter).forEach(a => {
     const it = el('div', 'item'), im = el('img'); im.src = a.thumb;
     const info = el('div', 'info');
-    info.append(el('b', null, a.judul), el('br'), el('small', null, ((a.detail[0] || {}).v || '') + ' · ' + rupiah(a.harga)));
+    info.append(el('b', null, a.judul), el('br'), el('small', null, ((a.detail[0] || {}).v || '') + ' · ' + rupiah(a.harga) + ' · oleh ' + a.oleh));
     const st = el('div', 'st baris');
     ['ready', 'booking', 'sold'].forEach(s => {
       const b = el('button', (a.status === s ? 'on ' : '') + s, s[0].toUpperCase() + s.slice(1));
       b.onclick = async () => { b.disabled = true; try { await post({ aksi: 'status', id: a.id, status: s }); a.status = s; gambarStok(); } catch (e) { alert(e.message); b.disabled = false; } };
       st.append(b);
     });
-    const ed = el('button', 'abu', 'Edit'), hp = el('button', 'merah', 'Hapus');
+    const ed = el('button', 'abu', 'Edit');
     ed.onclick = () => { const f = formEdit(a); it.append(f); ed.disabled = true; };
-    hp.onclick = () => hapus('akun', a.id, a.judul);               // ada di SEMUA kategori & semua akun (lama maupun baru)
-    it.append(im, info, st, ed, hp);
+    it.append(im, info, st, ed, tombolHapus('akun', a.id, a.judul, a.bisaHapus, a.oleh));
     box.append(it);
   });
   if (!box.children.length) box.textContent = 'Tidak ada akun di kategori ini.';
 }
-// form edit yang terbuka di bawah kartu: judul, deskripsi (bisa tambah/hapus baris), harga
+// form edit di bawah kartu: judul, deskripsi (tambah/hapus baris), harga, nomor WA
 function formEdit(a) {
   const f = el('div'); f.style.cssText = 'flex-basis:100%;background:#fff8ec;border-radius:14px;padding:12px';
   const judul = el('input'); judul.value = a.judul;
   const harga = el('input'); harga.value = a.harga; harga.inputMode = 'numeric';
+  const wa = el('input'); wa.value = '+' + a.wa; wa.type = 'tel'; wa.placeholder = '+62';
   const rows = el('div');
   const tambah = (k = '', v = '') => {
     const d = el('div', 'pair'), x = el('input'), y = el('input'), del = el('button', 'abu', '✕');
-    x.value = k; y.value = v; x.placeholder = 'Nama'; y.placeholder = 'Isi'; del.style.cssText = 'padding:6px 10px;grid-column:auto';
+    x.value = k; y.value = v; x.placeholder = 'Nama'; y.placeholder = 'Isi'; del.style.padding = '6px 10px';
     d.style.gridTemplateColumns = '1fr 2fr auto'; del.onclick = () => d.remove(); d.append(x, y, del); rows.append(d);
   };
   a.detail.forEach(d => tambah(d.k, d.v));
   const tb = el('button', 'abu', '+ Tambah deskripsi'), sv = el('button', null, 'Simpan'), bt = el('button', 'abu', 'Batal'), ps = el('p', 'pesan err');
-  const lj = el('label', null, 'Judul'), lh = el('label', null, 'Harga (angka saja)'), ld = el('label', null, 'Deskripsi');
   const aksi = el('div', 'baris'); aksi.style.marginTop = '12px'; aksi.append(sv, bt);
   tb.onclick = () => tambah(); bt.onclick = () => gambarStok();
   sv.onclick = async () => {
     sv.disabled = true; ps.textContent = '';
     const detail = [...rows.children].map(d => ({ k: d.children[0].value, v: d.children[1].value })).filter(d => d.k && d.v);
-    try { await post({ aksi: 'edit', id: a.id, judul: judul.value, detail, harga: harga.value }); await muat(); }
+    try { await post({ aksi: 'edit', id: a.id, judul: judul.value, detail, harga: harga.value, wa: wa.value }); await muat(); }
     catch (e) { ps.textContent = e.message; sv.disabled = false; }
   };
-  f.append(lj, judul, ld, rows, tb, lh, harga, aksi, ps); return f;
+  f.append(el('label', null, 'Judul'), judul, el('label', null, 'Deskripsi'), rows, tb, el('label', null, 'Harga (angka saja)'), harga,
+           el('label', null, 'Nomor WhatsApp penjual'), wa, aksi, ps); return f;
 }
 document.querySelectorAll('#filter button').forEach(b => b.onclick = () => {
   filter = b.dataset.f; document.querySelectorAll('#filter button').forEach(x => x.classList.toggle('aktif', x === b)); gambarStok();
 });
 async function hapus(tipe, id, nama) {
-  if (!confirm('Yakin hapus' + (nama ? ' "' + nama + '"' : '') + '? Kartu langsung hilang dari website.')) return;
+  if (!confirm('Yakin hapus "' + nama + '"? Kartu langsung hilang dari website.')) return;
   try { await post({ aksi: 'hapus', tipe, id }); muat(); } catch (e) { alert(e.message); }
+}
+
+// ---- kelola admin (khusus pemilik)
+async function muatAdmin() {
+  const box = $('daftarAdmin');
+  try {
+    const j = await (await fetch('/api/admin?admins=1')).json(); box.replaceChildren();
+    j.admins.forEach(a => {
+      const it = el('div', 'item'), info = el('div', 'info');
+      info.append(el('b', null, a.username + (a.pemilik ? ' (pemilik)' : '')), el('br'), el('small', null, a.email + (a.blok ? ' · DI-KICK' : ' · aktif')));
+      it.append(info);
+      if (!a.pemilik) {
+        const b = el('button', a.blok ? '' : 'merah', a.blok ? 'Pulihkan' : 'Kick');
+        b.onclick = async () => {
+          if (!a.blok && !confirm('Kick "' + a.username + '"? Dia langsung keluar dan nggak bisa login lagi.')) return;
+          try { await post({ aksi: a.blok ? 'pulihkan' : 'kick', username: a.username }); muatAdmin(); } catch (e) { alert(e.message); }
+        };
+        it.append(b);
+      }
+      box.append(it);
+    });
+  } catch { box.textContent = 'Gagal memuat.'; }
 }
 
 // ---- riwayat aktivitas (siapa ngapain)
 $('muatLog').onclick = async () => {
   const box = $('isiLog'); box.textContent = 'Memuat…';
   try {
-    const j = await (await fetch('/api/admin?log=1')).json();
+    const r = await fetch('/api/admin?log=1'), j = await r.json().catch(() => ({}));
+    if (!r.ok || !Array.isArray(j.log)) throw new Error(j.error || 'HTTP ' + r.status + ' (kemungkinan api/admin.js belum ter-update)');
     box.replaceChildren();
     if (!j.log.length) return box.append(el('p', 'pesan', 'Belum ada aktivitas.'));
     const NM = { kick: 'KICK admin', pulihkan: 'pulihkan admin', status: 'ubah status', edit: 'edit kartu', tambahAkun: 'tambah akun', tambahTesti: 'tambah testimoni', hapus: 'hapus', keluar: 'logout' };
     j.log.forEach(r => box.append(el('div', 'item', new Date(r.t).toLocaleString('id-ID') + ' · ' + r.u + ' · ' + (NM[r.aksi] || r.aksi) + (r.id ? ' · ' + r.id.slice(0, 12) : '') + (r.status ? ' → ' + r.status : ''))));
-  } catch { box.textContent = 'Gagal memuat.'; }
+  } catch (e) { box.textContent = 'Gagal memuat: ' + e.message; }
 };
 
 // ---- kompres foto di browser -> WebP (versi besar + kecil)
@@ -266,12 +299,14 @@ function barisDetail(k = '', v = '') {
   d.append(a, b); $('sDetail').append(d);
 }
 ['Kode Akun', 'Robux', 'Gamepass', 'Data'].forEach(k => barisDetail(k)); $('sTambah').onclick = () => barisDetail();
+try { $('sWA').value = localStorage.getItem('waTerakhir') || ''; } catch {}      // nomor terakhir yang dipakai diisi otomatis
 $('sKirim').onclick = async () => {
   $('sKirim').disabled = true; info('sPesan', 'Mengupload…', true);
   try {
     const f = await foto('sFoto');
     const detail = [...$('sDetail').children].map(d => ({ k: d.children[0].value, v: d.children[1].value })).filter(d => d.k && d.v);
-    await post({ aksi: 'tambahAkun', ...f, judul: $('sJudul').value, detail, harga: $('sHarga').value });
+    await post({ aksi: 'tambahAkun', ...f, judul: $('sJudul').value, detail, harga: $('sHarga').value, wa: $('sWA').value });
+    try { localStorage.setItem('waTerakhir', $('sWA').value); } catch {}
     info('sPesan', 'Berhasil! Akun sudah tampil di website.', true);
     $('sJudul').value = $('sHarga').value = $('sFoto').value = ''; $('prev').style.display = 'none'; muat();
   } catch (e) { info('sPesan', e.message, false); }
@@ -282,10 +317,11 @@ $('sKirim').onclick = async () => {
 $('tKirim').onclick = async () => {
   $('tKirim').disabled = true; info('tPesan', 'Mengupload…', true);
   try {
+    if (!$('tToko').value.trim()) throw new Error('Nama toko wajib diisi.');
     const f = await foto('tFoto');
-    await post({ aksi: 'tambahTesti', ...f, barang: $('tBarang').value, harga: $('tHarga').value, sistem: $('tSistem').value });
+    await post({ aksi: 'tambahTesti', ...f, toko: $('tToko').value, barang: $('tBarang').value, harga: $('tHarga').value, sistem: $('tSistem').value });
     info('tPesan', 'Berhasil! Testimoni sudah tampil di website.', true);
-    $('tBarang').value = $('tHarga').value = $('tSistem').value = $('tFoto').value = ''; muat();
+    ['tToko', 'tBarang', 'tHarga', 'tSistem', 'tFoto'].forEach(i => $(i).value = ''); muat();
   } catch (e) { info('tPesan', e.message, false); }
   $('tKirim').disabled = false;
 };
