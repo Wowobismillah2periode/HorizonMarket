@@ -18,19 +18,24 @@ module.exports = async (req, res) => {
 
   const b = req.body || {};
   const str = x => (typeof x === 'string' ? x.slice(0, 200) : '');
+  // cari admin berdasarkan username. Kalau nggak ada, tetap jalanin verifikasi hash palsu biar waktunya sama
+  const adm = L.admins().find(x => L.eq(x.username, str(b.username)));
+  const t = adm || { email: '', passwordHash: '', codeHash: '' };
   const ok = [
-    L.eq(str(b.username), process.env.ADMIN_USERNAME || ''),
-    L.eq(str(b.email).toLowerCase(), String(process.env.ADMIN_EMAIL || '').toLowerCase()),
-    L.verifyHash(str(b.password), process.env.ADMIN_PASSWORD_HASH),
-    L.verifyHash(str(b.kode), process.env.ADMIN_CODE_HASH),
+    !!adm,
+    L.eq(str(b.email).toLowerCase(), String(t.email || '').toLowerCase()),
+    L.verifyHash(str(b.password), t.passwordHash),
+    L.verifyHash(str(b.kode), t.codeHash),
   ].every(Boolean);
 
   await new Promise(r => setTimeout(r, 400));
   if (!ok) return res.status(401).json({ error: 'Data login salah.' });
 
+  // data login benar tapi akun lagi di-kick -> kasih tahu (aman: cuma yang datanya benar yang lihat pesan ini)
+  if (await L.redis('GET', 'blok:' + adm.username)) return res.status(403).json({ error: 'Akun ini dinonaktifkan oleh pemilik web.' });
   await L.redis('DEL', k);
   const sid = crypto.randomBytes(16).toString('hex');
-  await L.redis('SET', 'sess:' + sid, '1', 'EX', '7200');         // sesi tersimpan di server, hangus otomatis 2 jam
+  await L.redis('SET', 'sess:' + sid, adm.username, 'EX', '7200');         // sesi tersimpan di server, hangus otomatis 2 jam
   res.setHeader('Set-Cookie', L.cookie(L.sign({ sid, exp: Date.now() + 2 * 3600e3 }), 7200));
   res.json({ ok: true });
 };
