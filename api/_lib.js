@@ -46,13 +46,15 @@ function sign(payload) {
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
   return body + '.' + mac(body);
 }
-function session(req) {
+async function session(req) {
   const m = /(?:^|; )adm=([^;]+)/.exec(req.headers.cookie || '');
   if (!m || !process.env.SESSION_SECRET) return null;
   const [body, sig] = m[1].split('.');
   if (!body || !sig || !eq(sig, mac(body))) return null;
-  try { const p = JSON.parse(Buffer.from(body, 'base64url')); return p.exp > Date.now() ? p : null; }
-  catch { return null; }
+  let p;
+  try { p = JSON.parse(Buffer.from(body, 'base64url')); } catch { return null; }
+  if (!p.sid || !(p.exp > Date.now())) return null;
+  return (await redis('GET', 'sess:' + p.sid)) ? p : null;   // sesi harus masih terdaftar di server
 }
 const cookie = (v, age) => `adm=${v}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${age}`;
 
