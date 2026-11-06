@@ -53,6 +53,7 @@
       <button data-t="stok" class="aktif">Stok & Status</button>
       <button data-t="tambahStok">Tambah Stok Akun</button>
       <button data-t="testi">Testimoni</button>
+      <button data-t="admin" id="tabAdmin" style="display:none">Kelola Admin</button>
     </div>
 
     <div class="tab aktif" id="t-stok">
@@ -61,6 +62,7 @@
         <button data-f="booking">Booking</button><button data-f="sold">Sold</button>
       </div>
       <div class="kartu" id="daftarStok">Memuat…</div>
+      <div class="kartu"><div class="baris" style="justify-content:space-between"><h2 style="margin:0">Riwayat aktivitas</h2><button class="abu" id="muatLog">Muat riwayat</button></div><div id="isiLog"></div></div>
     </div>
 
     <div class="tab" id="t-tambahStok">
@@ -74,6 +76,12 @@
         <div style="margin-top:14px"><button id="sKirim">Upload ke website</button></div>
         <p id="sPesan" class="pesan"></p>
       </div>
+    </div>
+
+    <div class="tab" id="t-admin">
+      <div class="kartu"><h2 style="margin-top:0">Kelola Admin</h2>
+        <p class="sub" style="margin-bottom:8px;opacity:.7">Kick = admin itu langsung keluar dan nggak bisa login lagi sampai lu pulihkan.</p>
+        <div id="daftarAdmin">Memuat…</div></div>
     </div>
 
     <div class="tab" id="t-testi">
@@ -100,7 +108,30 @@ const post = async body => {
 };
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const tampilLogin = () => { $('panel').style.display = 'none'; $('login').style.display = 'block'; };
-const tampilPanel = () => { $('login').style.display = 'none'; $('panel').style.display = 'block'; muat(); };
+const tampilPanel = () => { $('login').style.display = 'none'; $('panel').style.display = 'block'; muat(); cekPemilik(); };
+async function cekPemilik() {                                   // tab Kelola Admin cuma muncul kalau yang login adalah pemilik
+  try { const j = await (await fetch('/api/admin')).json(); $('tabAdmin').style.display = j.pemilik ? '' : 'none'; if (j.pemilik) muatAdmin(); } catch {}
+}
+async function muatAdmin() {
+  const box = $('daftarAdmin');
+  try {
+    const j = await (await fetch('/api/admin?admins=1')).json(); box.replaceChildren();
+    j.admins.forEach(a => {
+      const it = el('div', 'item'), info = el('div', 'info');
+      info.append(el('b', null, a.username + (a.pemilik ? ' (pemilik)' : '')), el('br'), el('small', null, a.email + (a.blok ? ' · DI-KICK' : ' · aktif')));
+      it.append(info);
+      if (!a.pemilik) {
+        const b = el('button', a.blok ? '' : 'merah', a.blok ? 'Pulihkan' : 'Kick');
+        b.onclick = async () => {
+          if (!a.blok && !confirm('Kick "' + a.username + '"? Dia langsung keluar dan nggak bisa login lagi.')) return;
+          try { await post({ aksi: a.blok ? 'pulihkan' : 'kick', username: a.username }); muatAdmin(); } catch (e) { alert(e.message); }
+        };
+        it.append(b);
+      }
+      box.append(it);
+    });
+  } catch { box.textContent = 'Gagal memuat.'; }
+}
 
 // ---- login
 $('masuk').onclick = async () => {
@@ -200,6 +231,18 @@ async function hapus(tipe, id, nama) {
   if (!confirm('Yakin hapus' + (nama ? ' "' + nama + '"' : '') + '? Kartu langsung hilang dari website.')) return;
   try { await post({ aksi: 'hapus', tipe, id }); muat(); } catch (e) { alert(e.message); }
 }
+
+// ---- riwayat aktivitas (siapa ngapain)
+$('muatLog').onclick = async () => {
+  const box = $('isiLog'); box.textContent = 'Memuat…';
+  try {
+    const j = await (await fetch('/api/admin?log=1')).json();
+    box.replaceChildren();
+    if (!j.log.length) return box.append(el('p', 'pesan', 'Belum ada aktivitas.'));
+    const NM = { kick: 'KICK admin', pulihkan: 'pulihkan admin', status: 'ubah status', edit: 'edit kartu', tambahAkun: 'tambah akun', tambahTesti: 'tambah testimoni', hapus: 'hapus', keluar: 'logout' };
+    j.log.forEach(r => box.append(el('div', 'item', new Date(r.t).toLocaleString('id-ID') + ' · ' + r.u + ' · ' + (NM[r.aksi] || r.aksi) + (r.id ? ' · ' + r.id.slice(0, 12) : '') + (r.status ? ' → ' + r.status : ''))));
+  } catch { box.textContent = 'Gagal memuat.'; }
+};
 
 // ---- kompres foto di browser -> WebP (versi besar + kecil)
 function webp(file, lebar, q) {
