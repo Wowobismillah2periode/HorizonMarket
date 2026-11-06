@@ -20,14 +20,44 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const ses = await L.session(req);
   if (!ses) return res.status(401).json({ error: 'Belum login.' });
-  if (req.method === 'GET') return res.json({ ok: true });
+  const pemilik = ses.u === process.env.ADMIN_USERNAME;            // pemilik = admin utama
+  if (req.method === 'GET') {
+    if (req.query && req.query.admins) {                           // daftar admin + status (khusus pemilik)
+      if (!pemilik) return res.status(403).json({ error: 'Khusus pemilik.' });
+      const out = [];
+      for (const a of L.admins()) out.push({ username: a.username, email: a.email, pemilik: a.username === process.env.ADMIN_USERNAME,
+        blok: !!(await L.redis('GET', 'blok:' + a.username)) });
+      return res.json({ admins: out });
+    }
+    if (req.query && req.query.log) {                              // riwayat 50 aktivitas terakhir
+      const rows = await L.redis('LRANGE', 'log', '0', '49');
+      return res.json({ log: (rows || []).map(r => { try { return JSON.parse(r); } catch { return null; } }).filter(Boolean) });
+    }
+    return res.json({ ok: true, user: ses.u, pemilik });
+  }
   if (req.method !== 'POST' || req.headers['x-req'] !== '1') return res.status(403).end();
 
   const b = req.body || {};
+  // setiap aksi yang berhasil dicatat: siapa, kapan, ngapain (50-100 terakhir)
+  const ok = async o => {
+    await L.redis('LPUSH', 'log', JSON.stringify({ t: Date.now(), u: ses.u, aksi: b.aksi, id: txt(b.id || b.username, 60), status: b.status }));
+    await L.redis('LTRIM', 'log', '0', '99');
+    return res.json(o);
+  };
   if (b.aksi === 'keluar') {
     await L.redis('DEL', 'sess:' + ses.sid);                      // sesi dimatikan di server, token curian ikut mati
     res.setHeader('Set-Cookie', L.cookie('', 0));
-    return res.json({ ok: true });
+    return ok({ ok: true });
+  }
+
+  // kick / pulihkan admin: khusus pemilik, berlaku langsung (nggak perlu Redeploy)
+  if (b.aksi === 'kick' || b.aksi === 'pulihkan') {
+    if (!pemilik) return res.status(403).json({ error: 'Khusus pemilik.' });
+    const u = txt(b.username, 100);
+    if (u === ses.u) return res.status(400).json({ error: 'Pemilik tidak bisa di-kick.' });
+    if (!L.admins().some(a => a.username === u)) return res.status(400).json({ error: 'Admin tidak ditemukan.' });
+    if (b.aksi === 'kick') await L.redis('SET', 'blok:' + u, '1'); else await L.redis('DEL', 'blok:' + u);
+    return ok({ ok: true });
   }
 
   if (b.aksi === 'status') {
@@ -41,7 +71,7 @@ module.exports = async (req, res) => {
       const st = await L.getJSON('status', {});
       st[kode] = b.status; await L.setJSON('status', st);
     }
-    return res.json({ ok: true });
+    return ok({ ok: true });
   }
 
   // ubah judul / deskripsi / harga kartu yang sudah tayang (akun baru maupun akun lama)
@@ -58,7 +88,7 @@ module.exports = async (req, res) => {
       lama[kode] = { ...(lama[kode] || {}), judul, detail, harga };
       await L.setJSON('lama', lama);
     }
-    return res.json({ ok: true });
+    return ok({ ok: true });
   }
 
   if (b.aksi === 'tambahAkun' || b.aksi === 'tambahTesti') {
@@ -72,14 +102,14 @@ module.exports = async (req, res) => {
       const akun = await L.getJSON('akun', []);
       akun.push({ id, judul, detail, harga, status: 'ready', foto: id });
       await L.setJSON('akun', akun);
-      return res.json({ ok: true, id });
+      return ok({ ok: true, id });
     }
     const id = crypto.randomUUID();
     await L.setJSON('img:' + id, { full, kecil });
     const testi = await L.getJSON('testi', []);
     testi.push({ id, foto: id, barang: txt(b.barang, 120), harga: txt(b.harga, 60), sistem: txt(b.sistem, 120) });
     await L.setJSON('testi', testi);
-    return res.json({ ok: true, id });
+    return ok({ ok: true, id });
   }
 
   if (b.aksi === 'hapus') {
@@ -88,7 +118,7 @@ module.exports = async (req, res) => {
       const t = await L.getJSON('testi', []);
       await L.setJSON('testi', t.filter(x => x.id !== id));
       await L.redis('DEL', 'img:' + id);
-      return res.json({ ok: true });
+      return ok({ ok: true });
     }
     const akun = await L.getJSON('akun', []);
     if (akun.some(x => x.id === id)) {                            // akun baru: dihapus beserta fotonya
@@ -100,7 +130,7 @@ module.exports = async (req, res) => {
       lama[id] = { ...(lama[id] || {}), hapus: true };
       await L.setJSON('lama', lama);
     }
-    return res.json({ ok: true });
+    return ok({ ok: true });
   }
   res.status(400).json({ error: 'Aksi tidak dikenal.' });
 };

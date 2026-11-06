@@ -54,8 +54,20 @@ async function session(req) {
   let p;
   try { p = JSON.parse(Buffer.from(body, 'base64url')); } catch { return null; }
   if (!p.sid || !(p.exp > Date.now())) return null;
-  return (await redis('GET', 'sess:' + p.sid)) ? p : null;   // sesi harus masih terdaftar di server
+  const u = await redis('GET', 'sess:' + p.sid);                  // sesi harus masih terdaftar di server
+  if (!u || !admins().some(a => a.username === u)) return null;   // dan admin-nya masih ada di daftar (dicabut = sesi ikut mati)
+  if (await redis('GET', 'blok:' + u)) return null;               // di-kick pemilik = sesi langsung mati
+  return { ...p, u };
+}
+// Daftar admin: admin utama (ADMIN_USERNAME, dst) + admin tambahan (ADMIN_TAMBAHAN = JSON array).
+// Format satu admin tambahan: {"username":"..","email":"..","passwordHash":"..","codeHash":".."}
+function admins() {
+  const out = [];
+  if (process.env.ADMIN_USERNAME) out.push({ username: process.env.ADMIN_USERNAME, email: process.env.ADMIN_EMAIL,
+    passwordHash: process.env.ADMIN_PASSWORD_HASH, codeHash: process.env.ADMIN_CODE_HASH });
+  try { const x = JSON.parse(process.env.ADMIN_TAMBAHAN || '[]'); if (Array.isArray(x)) out.push(...x.filter(a => a && a.username)); } catch {}
+  return out;
 }
 const cookie = (v, age) => `adm=${v}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${age}`;
 
-module.exports = { redis, getJSON, setJSON, eq, verifyHash, sign, session, cookie };
+module.exports = { redis, getJSON, setJSON, eq, verifyHash, sign, session, cookie, admins };
