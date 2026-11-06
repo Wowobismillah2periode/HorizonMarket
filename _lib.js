@@ -1,13 +1,25 @@
 // Fungsi bantu: Redis (Upstash), hash password, token sesi. Nggak butuh library tambahan.
 const crypto = require('crypto');
 
-const URL_ = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const TOK  = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+// Cari URL & token Redis REST di Environment Variables.
+// Nama variabelnya bisa kena prefix dari integrasi Vercel (contoh: UPSTASH_REDIS_REST_KV_REST_API_URL),
+// jadi dicari berdasarkan akhiran nama. URL WAJIB diawali https:// (variabel rediss:// sengaja diabaikan).
+function cari(akhiran, valid) {
+  for (const [k, v] of Object.entries(process.env)) if (akhiran.test(k) && valid(String(v || ''))) return String(v).trim();
+}
+const konfig = () => ({
+  url: cari(/(^|_)(KV_REST_API_URL|REDIS_REST_URL)$/, v => /^https:\/\//.test(v.trim())),
+  tok: cari(/(^|_)(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/, v => v.trim().length > 10),
+});
 
 async function redis(...cmd) {
-  const r = await fetch(URL_, { method: 'POST', headers: { Authorization: 'Bearer ' + TOK }, body: JSON.stringify(cmd) });
-  const j = await r.json();
-  if (j.error) throw new Error(j.error);
+  const { url, tok } = konfig();
+  if (!url || !tok) throw new Error('Env Redis REST tidak ditemukan: butuh URL berawalan https:// dan token REST');
+  let r;
+  try { r = await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: JSON.stringify(cmd) }); }
+  catch { throw new Error('Gagal terhubung ke Redis'); }       // pesan sengaja polos: jangan pernah menyertakan URL/token
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.error) throw new Error('Redis menolak permintaan (HTTP ' + r.status + ')');
   return j.result;
 }
 async function getJSON(key, fallback) {
@@ -34,13 +46,15 @@ function sign(payload) {
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
   return body + '.' + mac(body);
 }
-function session(req) {
+async function session(req) {
   const m = /(?:^|; )adm=([^;]+)/.exec(req.headers.cookie || '');
   if (!m || !process.env.SESSION_SECRET) return null;
   const [body, sig] = m[1].split('.');
   if (!body || !sig || !eq(sig, mac(body))) return null;
-  try { const p = JSON.parse(Buffer.from(body, 'base64url')); return p.exp > Date.now() ? p : null; }
-  catch { return null; }
+  let p;
+  try { p = JSON.parse(Buffer.from(body, 'base64url')); } catch { return null; }
+  if (!p.sid || !(p.exp > Date.now())) return null;
+  return (await redis('GET', 'sess:' + p.sid)) ? p : null;   // sesi harus masih terdaftar di server
 }
 const cookie = (v, age) => `adm=${v}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${age}`;
 
