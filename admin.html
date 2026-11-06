@@ -129,13 +129,17 @@ let semua = [], filter = 'semua';
 const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
 async function muat() {
   const [data, html] = await Promise.all([fetch('/api/data', { cache: 'no-store' }).then(r => r.json()), fetch('/stok_akun.html').then(r => r.text())]);
+  data.lama = data.lama || {};
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const lama = [...doc.querySelectorAll('.kartu')].map(k => {            // akun yang ditulis manual di HTML
-    const kode = k.querySelector('.detail b').textContent;
-    return { id: kode, judul: k.querySelector('.nama').textContent + ' ' + kode, harga: k.querySelector('.harga').textContent,
-             status: data.status[kode] || k.dataset.status, thumb: k.querySelector('img').getAttribute('src'), lama: true };
-  });
-  const baru = data.akun.map(a => ({ id: a.id, judul: a.judul, harga: rupiah(a.harga), status: a.status, thumb: '/api/img?id=' + a.foto + '&k=1' }));
+    const rows = [...k.querySelectorAll('.detail li')].map(li => ({ k: li.children[0].textContent.trim(), v: li.children[1].textContent.trim() }));
+    const kode = rows[0] ? rows[0].v : '';                                 // kode ASLI = id akun lama
+    const o = data.lama[kode] || {};
+    return { id: kode, lama: true, hapus: !!o.hapus, judul: o.judul || k.querySelector('.nama').textContent.trim(), detail: o.detail || rows,
+             harga: o.harga || k.querySelector('.harga').textContent.replace(/\D/g, ''), status: data.status[kode] || k.dataset.status,
+             thumb: k.querySelector('img').getAttribute('src') };
+  }).filter(a => !a.hapus);
+  const baru = data.akun.map(a => ({ id: a.id, judul: a.judul, detail: a.detail, harga: a.harga, status: a.status, thumb: '/api/img?id=' + a.foto + '&k=1' }));
   semua = [...lama, ...baru]; gambarStok();
   const box = $('daftarTesti'); box.replaceChildren(el('h2', null, 'Daftar Testimoni (' + data.testi.length + ')'));
   data.testi.forEach((t, i) => {
@@ -149,24 +153,51 @@ function gambarStok() {
   const box = $('daftarStok'); box.replaceChildren();
   semua.filter(a => filter === 'semua' || a.status === filter).forEach(a => {
     const it = el('div', 'item'), im = el('img'); im.src = a.thumb;
-    const info = el('div', 'info'); info.append(el('b', null, a.judul), el('br'), el('small', null, a.harga));
+    const info = el('div', 'info');
+    info.append(el('b', null, a.judul), el('br'), el('small', null, ((a.detail[0] || {}).v || '') + ' · ' + rupiah(a.harga)));
     const st = el('div', 'st baris');
     ['ready', 'booking', 'sold'].forEach(s => {
       const b = el('button', (a.status === s ? 'on ' : '') + s, s[0].toUpperCase() + s.slice(1));
       b.onclick = async () => { b.disabled = true; try { await post({ aksi: 'status', id: a.id, status: s }); a.status = s; gambarStok(); } catch (e) { alert(e.message); b.disabled = false; } };
       st.append(b);
     });
-    it.append(im, info, st);
-    if (!a.lama) { const hp = el('button', 'merah', 'Hapus'); hp.onclick = () => hapus('akun', a.id); it.append(hp); }
+    const ed = el('button', 'abu', 'Edit'), hp = el('button', 'merah', 'Hapus');
+    ed.onclick = () => { const f = formEdit(a); it.append(f); ed.disabled = true; };
+    hp.onclick = () => hapus('akun', a.id, a.judul);               // ada di SEMUA kategori & semua akun (lama maupun baru)
+    it.append(im, info, st, ed, hp);
     box.append(it);
   });
   if (!box.children.length) box.textContent = 'Tidak ada akun di kategori ini.';
 }
+// form edit yang terbuka di bawah kartu: judul, deskripsi (bisa tambah/hapus baris), harga
+function formEdit(a) {
+  const f = el('div'); f.style.cssText = 'flex-basis:100%;background:#fff8ec;border-radius:14px;padding:12px';
+  const judul = el('input'); judul.value = a.judul;
+  const harga = el('input'); harga.value = a.harga; harga.inputMode = 'numeric';
+  const rows = el('div');
+  const tambah = (k = '', v = '') => {
+    const d = el('div', 'pair'), x = el('input'), y = el('input'), del = el('button', 'abu', '✕');
+    x.value = k; y.value = v; x.placeholder = 'Nama'; y.placeholder = 'Isi'; del.style.cssText = 'padding:6px 10px;grid-column:auto';
+    d.style.gridTemplateColumns = '1fr 2fr auto'; del.onclick = () => d.remove(); d.append(x, y, del); rows.append(d);
+  };
+  a.detail.forEach(d => tambah(d.k, d.v));
+  const tb = el('button', 'abu', '+ Tambah deskripsi'), sv = el('button', null, 'Simpan'), bt = el('button', 'abu', 'Batal'), ps = el('p', 'pesan err');
+  const lj = el('label', null, 'Judul'), lh = el('label', null, 'Harga (angka saja)'), ld = el('label', null, 'Deskripsi');
+  const aksi = el('div', 'baris'); aksi.style.marginTop = '12px'; aksi.append(sv, bt);
+  tb.onclick = () => tambah(); bt.onclick = () => gambarStok();
+  sv.onclick = async () => {
+    sv.disabled = true; ps.textContent = '';
+    const detail = [...rows.children].map(d => ({ k: d.children[0].value, v: d.children[1].value })).filter(d => d.k && d.v);
+    try { await post({ aksi: 'edit', id: a.id, judul: judul.value, detail, harga: harga.value }); await muat(); }
+    catch (e) { ps.textContent = e.message; sv.disabled = false; }
+  };
+  f.append(lj, judul, ld, rows, tb, lh, harga, aksi, ps); return f;
+}
 document.querySelectorAll('#filter button').forEach(b => b.onclick = () => {
   filter = b.dataset.f; document.querySelectorAll('#filter button').forEach(x => x.classList.toggle('aktif', x === b)); gambarStok();
 });
-async function hapus(tipe, id) {
-  if (!confirm('Yakin hapus? Ini nggak bisa dibatalin.')) return;
+async function hapus(tipe, id, nama) {
+  if (!confirm('Yakin hapus' + (nama ? ' "' + nama + '"' : '') + '? Kartu langsung hilang dari website.')) return;
   try { await post({ aksi: 'hapus', tipe, id }); muat(); } catch (e) { alert(e.message); }
 }
 

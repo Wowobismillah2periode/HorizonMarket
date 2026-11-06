@@ -3,6 +3,7 @@
 (async () => {
   let data;
   try { data = await (await fetch('/api/data', { cache: 'no-store' })).json(); } catch { return; }
+  data.lama = data.lama || {};
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const LABEL = { ready: '✓ READY', booking: '⏳ BOOKING', sold: '✕ SOLD' };
   const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -18,24 +19,38 @@
     const i = el('img'); i.src = '/api/img?id=' + id + '&k=1'; i.alt = alt; i.loading = 'lazy';
     b.append(i, badge); return b;
   }
+  function isiDetail(ul, detail) {
+    ul.replaceChildren();
+    detail.forEach(d => { const li = el('li'); li.append(el('span', null, d.k), el('b', null, d.v)); ul.append(li); });
+  }
+  function linkWA(detail, judul, harga) {
+    const kode = (detail.find(d => /kode/i.test(d.k)) || { v: judul }).v;
+    return 'https://wa.me/6285863549795?text=' + encodeURIComponent(`Bang, beli akun kode : ${kode} (${rupiah(harga).replace('Rp ', 'Rp')})`);
+  }
 
   // ===== halaman stok akun =====
   const grid = document.getElementById('testi-grid') ? null : document.querySelector('.grid');   // null di halaman testimoni
   if (grid) {
-    document.querySelectorAll('.kartu').forEach(k => {          // akun lama: timpa status kalau diubah di admin
-      const kode = k.querySelector('.detail b')?.textContent;
+    document.querySelectorAll('.kartu').forEach(k => {          // akun lama (ditulis di HTML)
+      const kode = k.querySelector('.detail b')?.textContent;   // kode ASLI dari HTML, dibaca sebelum ada perubahan
+      const o = data.lama[kode];
+      if (o && o.hapus) return k.remove();                      // dihapus lewat admin
+      if (o && o.judul) {                                       // diedit lewat admin
+        k.querySelector('.nama').textContent = o.judul;
+        isiDetail(k.querySelector('.detail'), o.detail);
+        k.querySelector('.harga').textContent = rupiah(o.harga);
+        k.querySelector('.wa').href = linkWA(o.detail, o.judul, o.harga);
+        k.querySelector('.foto').setAttribute('aria-label', 'Lihat foto lengkap ' + o.judul);
+        k.querySelector('.foto img').alt = 'Screenshot akun ' + o.judul;
+      }
       if (data.status[kode]) pasangStatus(k, data.status[kode]);
     });
-    data.akun.forEach(a => {
+    data.akun.forEach(a => {                                    // akun baru dari admin
       const k = el('article', 'kartu');
-      k.append(foto(a.foto, a.judul, el('span', 'status')), el('h2', 'nama', a.judul));
-      const ul = el('ul', 'detail');
-      a.detail.forEach(d => { const li = el('li'); li.append(el('span', null, d.k), el('b', null, d.v)); ul.append(li); });
-      const kode = (a.detail.find(d => /kode/i.test(d.k)) || { v: a.judul }).v;
-      const wa = el('a', 'wa'); wa.target = '_blank'; wa.rel = 'noopener';
-      wa.href = 'https://wa.me/6285863549795?text=' + encodeURIComponent(`Bang, beli akun kode : ${kode} (${rupiah(a.harga).replace('Rp ', 'Rp')})`);
+      const ul = el('ul', 'detail'); isiDetail(ul, a.detail);
+      const wa = el('a', 'wa'); wa.target = '_blank'; wa.rel = 'noopener'; wa.href = linkWA(a.detail, a.judul, a.harga);
       wa.innerHTML = '<svg aria-hidden="true"><use href="#i-wa"/></svg>'; wa.append('Chat via WhatsApp');
-      k.append(ul, el('p', 'harga', rupiah(a.harga)), wa);
+      k.append(foto(a.foto, a.judul, el('span', 'status')), el('h2', 'nama', a.judul), ul, el('p', 'harga', rupiah(a.harga)), wa);
       grid.append(k); pasangStatus(k, a.status);
     });
     document.querySelector('.chip[aria-pressed="true"]')?.click();   // terapkan filter yang lagi aktif
