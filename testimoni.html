@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="halaman.css">
+    <link rel="stylesheet" href="stok_akun.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
@@ -63,11 +64,25 @@
     <!-- ISI HALAMAN: sementara kosong, fitur testimoni belum ditambahkan -->
     <main class="halaman halaman--tengah">
         <h1 class="sr-only">Testimoni</h1>
-        <section class="kosong">
-            <img src="kosong_fitur.png" alt="" width="324" height="294">
+        <div class="grid" id="testi-grid"></div>
+        <section class="kosong" id="kosong">
+            <img src="kosong_fitur.webp" alt="" width="324" height="294">
             <h2>Maaf, fitur yang kamu cari belum ditambahkan</h2>
             <p>Mohon coba lagi nanti saat fitur sudah ditambahkan</p>
         </section>
     </main>
+    <dialog id="lightbox">
+        <form method="dialog"><button class="tutup" aria-label="Tutup">✕</button></form>
+        <img src="" alt="Foto testimoni lengkap">
+    </dialog>
+    <script>
+        const dlg = document.getElementById('lightbox');
+        document.addEventListener('click', e => {
+            const b = e.target.closest('.foto');
+            if (b) { dlg.querySelector('img').src = b.dataset.full; dlg.showModal(); }
+            if (e.target === dlg) dlg.close();
+        });
+    </script>
+    <script src="dinamis.js"></script>
 </body>
 </html>

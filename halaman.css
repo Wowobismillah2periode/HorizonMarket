@@ -117,3 +117,9 @@ body .box-navbar nav {
 @media (prefers-reduced-motion: reduce) {
     .kosong { animation: none; }
 }
+
+/* ----- Testimoni: grid 2 kolom, kartu tanpa harga & tombol WA ----- */
+#testi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; margin: 0 auto; }
+#testi-grid:empty { display: none; }
+.deskripsi { list-style: none; background: #fff; border-radius: 14px; padding: 10px 12px; font-size: .85rem; font-weight: 700; line-height: 1.5; text-align: left; }
+.deskripsi li { overflow-wrap: anywhere; }

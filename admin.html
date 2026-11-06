@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin - Horizon Market</title>
+<style>
+  :root { --oren:#FF8A00; --krem:#FFF8EC; --hitam:#1F2230; --hijau:#22A34A; --merah:#D92D20; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Nunito", system-ui, sans-serif; background: var(--krem); color: var(--hitam); padding: 16px; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 900; } h2 { font-size: 1.1rem; margin: 18px 0 8px; }
+  .kartu { background: #fff; border: 2px solid var(--oren); border-radius: 18px; padding: 16px; margin: 12px 0; }
+  label { display: block; font-weight: 700; font-size: .85rem; margin: 10px 0 4px; }
+  input, textarea { width: 100%; padding: 10px 12px; border: 2px solid #e5d3b8; border-radius: 12px; font: inherit; }
+  input:focus { outline: 0; border-color: var(--oren); }
+  button { font: inherit; font-weight: 800; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; background: var(--oren); color: #fff; }
+  button.abu { background: #e9e0d2; color: var(--hitam); } button.merah { background: var(--merah); }
+  button:disabled { opacity: .5; cursor: wait; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .tabs button { background: #fff; color: var(--oren); border: 2px solid var(--oren); }
+  .tabs button.aktif { background: var(--oren); color: #fff; }
+  .baris { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .item { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0e4d0; flex-wrap: wrap; }
+  .item img { width: 56px; aspect-ratio: 7/10; object-fit: cover; border-radius: 8px; }
+  .item .info { flex: 1; min-width: 150px; } .item small { opacity: .7; }
+  .st button { padding: 6px 10px; font-size: .8rem; background: #e9e0d2; color: var(--hitam); }
+  .st button.on.ready { background: var(--hijau); color: #fff; } .st button.on.booking { background: var(--oren); color: #fff; } .st button.on.sold { background: var(--merah); color: #fff; }
+  .pesan { margin-top: 10px; font-weight: 700; } .err { color: var(--merah); } .ok { color: var(--hijau); }
+  #panel, .tab { display: none; } .tab.aktif { display: block; }
+  .pair { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 6px; }
+  #prev { max-width: 140px; border-radius: 12px; margin-top: 8px; display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- ============ LOGIN ============ -->
+  <div id="login" class="kartu" style="max-width:420px;margin-top:8vh">
+    <h1>Admin Horizon Market</h1>
+    <label>Username</label><input id="u" autocomplete="username">
+    <label>Gmail</label><input id="e" type="email" autocomplete="email">
+    <label>Password</label><input id="p" type="password" autocomplete="current-password">
+    <label>Kode unik</label><input id="k" type="password" autocomplete="one-time-code">
+    <div style="margin-top:14px"><button id="masuk">Masuk</button></div>
+    <p id="lpesan" class="pesan err"></p>
+  </div>
+
+  <!-- ============ PANEL ============ -->
+  <div id="panel">
+    <div class="baris" style="justify-content:space-between"><h1>Panel Admin</h1><button class="abu" id="keluar">Keluar</button></div>
+    <div class="tabs">
+      <button data-t="stok" class="aktif">Stok & Status</button>
+      <button data-t="tambahStok">Tambah Stok Akun</button>
+      <button data-t="testi">Testimoni</button>
+    </div>
+
+    <div class="tab aktif" id="t-stok">
+      <div class="baris tabs" id="filter">
+        <button data-f="semua" class="aktif">Semua</button><button data-f="ready">Ready</button>
+        <button data-f="booking">Booking</button><button data-f="sold">Sold</button>
+      </div>
+      <div class="kartu" id="daftarStok">Memuat…</div>
+    </div>
+
+    <div class="tab" id="t-tambahStok">
+      <div class="kartu">
+        <h2>Tambah Stok Akun</h2>
+        <label>Foto spek akun (rasio 7:10)</label><input type="file" id="sFoto" accept="image/*"><img id="prev" alt="">
+        <label>Judul</label><input id="sJudul" placeholder="Bacon BSAE">
+        <label>Deskripsi</label><div id="sDetail"></div>
+        <button class="abu" id="sTambah" type="button">+ Tambah deskripsi</button>
+        <label>Harga (angka saja)</label><input id="sHarga" inputmode="numeric" placeholder="10000">
+        <div style="margin-top:14px"><button id="sKirim">Upload ke website</button></div>
+        <p id="sPesan" class="pesan"></p>
+      </div>
+    </div>
+
+    <div class="tab" id="t-testi">
+      <div class="kartu">
+        <h2>Tambah Testimoni</h2>
+        <label>Foto testimoni (rasio 7:10)</label><input type="file" id="tFoto" accept="image/*">
+        <label>📂 Barang</label><input id="tBarang"><label>💸 Harga</label><input id="tHarga"><label>👥 Sistem</label><input id="tSistem">
+        <div style="margin-top:14px"><button id="tKirim">Upload ke website</button></div>
+        <p id="tPesan" class="pesan"></p>
+      </div>
+      <div class="kartu" id="daftarTesti">Memuat…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const post = async body => {
+  const r = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Req': '1' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { tampilLogin(); throw new Error('Sesi habis, login lagi.'); }
+  if (!r.ok) throw new Error(j.error || 'Gagal.');
+  return j;
+};
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const tampilLogin = () => { $('panel').style.display = 'none'; $('login').style.display = 'block'; };
+const tampilPanel = () => { $('login').style.display = 'none'; $('panel').style.display = 'block'; muat(); };
+
+// ---- login
+$('masuk').onclick = async () => {
+  $('masuk').disabled = true; $('lpesan').textContent = '';
+  try {
+    const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: $('u').value, email: $('e').value, password: $('p').value, kode: $('k').value }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'Gagal login.');
+    $('p').value = $('k').value = ''; tampilPanel();
+  } catch (e) { $('lpesan').textContent = e.message; }
+  $('masuk').disabled = false;
+};
+['u', 'e', 'p', 'k'].forEach(i => $(i).addEventListener('keydown', e => e.key === 'Enter' && $('masuk').click()));
+$('keluar').onclick = async () => { await post({ aksi: 'keluar' }).catch(() => {}); tampilLogin(); };
+fetch('/api/admin').then(r => r.ok ? tampilPanel() : tampilLogin()).catch(tampilLogin);
+
+// ---- tab
+document.querySelectorAll('.tabs [data-t]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs [data-t]').forEach(x => x.classList.toggle('aktif', x === b));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('aktif', x.id === 't-' + b.dataset.t));
+});
+
+// ---- daftar stok & testimoni
+let semua = [], filter = 'semua';
+const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
+async function muat() {
+  const [data, html] = await Promise.all([fetch('/api/data', { cache: 'no-store' }).then(r => r.json()), fetch('/stok_akun.html').then(r => r.text())]);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const lama = [...doc.querySelectorAll('.kartu')].map(k => {            // akun yang ditulis manual di HTML
+    const kode = k.querySelector('.detail b').textContent;
+    return { id: kode, judul: k.querySelector('.nama').textContent + ' ' + kode, harga: k.querySelector('.harga').textContent,
+             status: data.status[kode] || k.dataset.status, thumb: k.querySelector('img').getAttribute('src'), lama: true };
+  });
+  const baru = data.akun.map(a => ({ id: a.id, judul: a.judul, harga: rupiah(a.harga), status: a.status, thumb: '/api/img?id=' + a.foto + '&k=1' }));
+  semua = [...lama, ...baru]; gambarStok();
+  const box = $('daftarTesti'); box.replaceChildren(el('h2', null, 'Daftar Testimoni (' + data.testi.length + ')'));
+  data.testi.forEach((t, i) => {
+    const it = el('div', 'item'), im = el('img'); im.src = '/api/img?id=' + t.foto + '&k=1';
+    const info = el('div', 'info'); info.append(el('b', null, 'Testi ' + (i + 1)), el('br'), el('small', null, t.barang + ' · ' + t.harga));
+    const hp = el('button', 'merah', 'Hapus'); hp.onclick = () => hapus('testi', t.id);
+    it.append(im, info, hp); box.append(it);
+  });
+}
+function gambarStok() {
+  const box = $('daftarStok'); box.replaceChildren();
+  semua.filter(a => filter === 'semua' || a.status === filter).forEach(a => {
+    const it = el('div', 'item'), im = el('img'); im.src = a.thumb;
+    const info = el('div', 'info'); info.append(el('b', null, a.judul), el('br'), el('small', null, a.harga));
+    const st = el('div', 'st baris');
+    ['ready', 'booking', 'sold'].forEach(s => {
+      const b = el('button', (a.status === s ? 'on ' : '') + s, s[0].toUpperCase() + s.slice(1));
+      b.onclick = async () => { b.disabled = true; try { await post({ aksi: 'status', id: a.id, status: s }); a.status = s; gambarStok(); } catch (e) { alert(e.message); b.disabled = false; } };
+      st.append(b);
+    });
+    it.append(im, info, st);
+    if (!a.lama) { const hp = el('button', 'merah', 'Hapus'); hp.onclick = () => hapus('akun', a.id); it.append(hp); }
+    box.append(it);
+  });
+  if (!box.children.length) box.textContent = 'Tidak ada akun di kategori ini.';
+}
+document.querySelectorAll('#filter button').forEach(b => b.onclick = () => {
+  filter = b.dataset.f; document.querySelectorAll('#filter button').forEach(x => x.classList.toggle('aktif', x === b)); gambarStok();
+});
+async function hapus(tipe, id) {
+  if (!confirm('Yakin hapus? Ini nggak bisa dibatalin.')) return;
+  try { await post({ aksi: 'hapus', tipe, id }); muat(); } catch (e) { alert(e.message); }
+}
+
+// ---- kompres foto di browser -> WebP (versi besar + kecil)
+function webp(file, lebar, q) {
+  return new Promise((ok, gagal) => {
+    const img = new Image(); img.onload = () => {
+      const c = document.createElement('canvas'); c.width = Math.min(lebar, img.width); c.height = Math.round(img.height * c.width / img.width);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL('image/webp', q));
+    }; img.onerror = () => gagal(new Error('File bukan gambar.')); img.src = URL.createObjectURL(file);
+  });
+}
+async function foto(inputId) {
+  const f = $(inputId).files[0]; if (!f) throw new Error('Pilih foto dulu.');
+  return { foto: await webp(f, 1049, .82), kecil: await webp(f, 520, .8) };
+}
+const info = (id, teks, ok) => { $(id).textContent = teks; $(id).className = 'pesan ' + (ok ? 'ok' : 'err'); };
+$('sFoto').onchange = async e => { const p = $('prev'); if (e.target.files[0]) { p.src = await webp(e.target.files[0], 300, .7); p.style.display = 'block'; } };
+
+// ---- tambah stok akun
+function barisDetail(k = '', v = '') {
+  const d = el('div', 'pair'), a = el('input'), b = el('input'); a.placeholder = 'Nama (misal: Kode Akun)'; b.placeholder = 'Isi (misal: [BSAE 10])'; a.value = k; b.value = v;
+  d.append(a, b); $('sDetail').append(d);
+}
+['Kode Akun', 'Robux', 'Gamepass', 'Data'].forEach(k => barisDetail(k)); $('sTambah').onclick = () => barisDetail();
+$('sKirim').onclick = async () => {
+  $('sKirim').disabled = true; info('sPesan', 'Mengupload…', true);
+  try {
+    const f = await foto('sFoto');
+    const detail = [...$('sDetail').children].map(d => ({ k: d.children[0].value, v: d.children[1].value })).filter(d => d.k && d.v);
+    await post({ aksi: 'tambahAkun', ...f, judul: $('sJudul').value, detail, harga: $('sHarga').value });
+    info('sPesan', 'Berhasil! Akun sudah tampil di website.', true);
+    $('sJudul').value = $('sHarga').value = $('sFoto').value = ''; $('prev').style.display = 'none'; muat();
+  } catch (e) { info('sPesan', e.message, false); }
+  $('sKirim').disabled = false;
+};
+
+// ---- tambah testimoni
+$('tKirim').onclick = async () => {
+  $('tKirim').disabled = true; info('tPesan', 'Mengupload…', true);
+  try {
+    const f = await foto('tFoto');
+    await post({ aksi: 'tambahTesti', ...f, barang: $('tBarang').value, harga: $('tHarga').value, sistem: $('tSistem').value });
+    info('tPesan', 'Berhasil! Testimoni sudah tampil di website.', true);
+    $('tBarang').value = $('tHarga').value = $('tSistem').value = $('tFoto').value = ''; muat();
+  } catch (e) { info('tPesan', e.message, false); }
+  $('tKirim').disabled = false;
+};
+</script>
+</body>
+</html>
