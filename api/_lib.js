@@ -1,14 +1,25 @@
 // Fungsi bantu: Redis (Upstash), hash password, token sesi. Nggak butuh library tambahan.
 const crypto = require('crypto');
 
-const URL_ = process.env.UPSTASH_REDIS_REST_KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-
-const TOK = process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+// Cari URL & token Redis REST di Environment Variables.
+// Nama variabelnya bisa kena prefix dari integrasi Vercel (contoh: UPSTASH_REDIS_REST_KV_REST_API_URL),
+// jadi dicari berdasarkan akhiran nama. URL WAJIB diawali https:// (variabel rediss:// sengaja diabaikan).
+function cari(akhiran, valid) {
+  for (const [k, v] of Object.entries(process.env)) if (akhiran.test(k) && valid(String(v || ''))) return String(v).trim();
+}
+const konfig = () => ({
+  url: cari(/(^|_)(KV_REST_API_URL|REDIS_REST_URL)$/, v => /^https:\/\//.test(v.trim())),
+  tok: cari(/(^|_)(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/, v => v.trim().length > 10),
+});
 
 async function redis(...cmd) {
-  const r = await fetch(URL_, { method: 'POST', headers: { Authorization: 'Bearer ' + TOK }, body: JSON.stringify(cmd) });
-  const j = await r.json();
-  if (j.error) throw new Error(j.error);
+  const { url, tok } = konfig();
+  if (!url || !tok) throw new Error('Env Redis REST tidak ditemukan: butuh URL berawalan https:// dan token REST');
+  let r;
+  try { r = await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: JSON.stringify(cmd) }); }
+  catch { throw new Error('Gagal terhubung ke Redis'); }       // pesan sengaja polos: jangan pernah menyertakan URL/token
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.error) throw new Error('Redis menolak permintaan (HTTP ' + r.status + ')');
   return j.result;
 }
 async function getJSON(key, fallback) {
